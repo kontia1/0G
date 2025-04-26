@@ -1,1 +1,1 @@
-# 0G
+# 0G AUTO MINT AND SWAP
