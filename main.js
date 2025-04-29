@@ -1,4 +1,3 @@
-// === zero-bot.js ===
 const fs = require('fs');
 const { ethers } = require('ethers');
 const Web3 = require('web3');
