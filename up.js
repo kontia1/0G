@@ -190,9 +190,8 @@ async function uploadToStorage(imageData, wallet, walletIndex, uploadIndex) {
       gasLimit: 500_000,
     });
 
-    console.log(`Transaction sent: ${tx.hash}`);
+    console.log(`Uploading: ${tx.hash}`);
     const receipt = await tx.wait();
-    console.log(`Transaction confirmed in block ${receipt.blockNumber}`);
     return receipt;
   } catch (error) {
     console.error(`Upload failed: ${error.message}`);
