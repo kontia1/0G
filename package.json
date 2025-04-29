@@ -1,14 +1,9 @@
-  "name": "zero-bot",
+{
+  "name": "0g-bot",
   "version": "1.0.0",
-  "description": "Bot Auto Mint + Swap di 0G Labs",
-  "main": "main.js",
-  "scripts": {
-    "start": "main.js"
-  },
-  "dependencies": {
+   "dependencies": {
+    "chalk": "^5.3.0",
     "ethers": "^6.8.1",
-    "web3": "^4.2.2",
-    "web3-providers-http": "^4.2.2",
-    "chalk": "^5.3.0"
+    "web3": "^4.4.0"
   }
 }
