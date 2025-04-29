@@ -66,7 +66,7 @@ async function mintTokens(wallet) {
 
 // === Swap Functionality ===
 async function swapTokens(wallet) {
-  const swapTimes = getRandomInt(3, 5);
+  const swapTimes = getRandomInt(7, 10);
   console.log(chalk.blue(`\n🔁 Performing ${swapTimes} swaps for wallet ${wallet.address}`));
 
   for (let i = 0; i < swapTimes; i++) {
