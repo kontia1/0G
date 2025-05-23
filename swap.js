@@ -2,13 +2,13 @@ const chalk = require('chalk');
 const { ethers } = require('ethers');
 
 const SCAN_URL = 'https://chainscan-galileo.0g.ai/tx/';
-const ROUTER_ADDRESS = '0x16a811adc55A99b4456F62c54F12D3561559a268';
+const ROUTER_ADDRESS = '0xb95B5953FF8ee5D5d9818CdbEfE363ff2191318c';
 
 // Token Addresses
 const TOKENS = {
-  ETH: '0x2619090fcfdb99a8ccf51c76c9467f7375040eeb',
-  BTC: '0x6dc29491a8396bd52376b4f6da1f3e889c16ca85',
-  USDT: '0xa8f030218d7c26869cadd46c5f10129e635cd565',
+  ETH: '0x0fE9B43625fA7EdD663aDcEC0728DD635e4AbF7c',
+  BTC: '0x36f6414ff1df609214ddaba71c84f18bcf00f67d',
+  USDT: '0x3ec8a8705be1d5ca90066b37ba62c4183b024ebf',
 };
 
 const TOKEN_LIST = Object.keys(TOKENS);
