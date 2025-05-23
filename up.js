@@ -119,10 +119,16 @@ function initializeWallet() {
 // === Image Handling ===
 async function fetchRandomImage() {
   const axiosInstance = createAxiosInstance();
-  const response = await axiosInstance.get('https://picsum.photos/800/600', { responseType: 'arraybuffer' });
+  // List of image APIs
+  const urls = [
+    { url: 'https://picsum.photos/800/600', responseType: 'arraybuffer' },
+    { url: 'https://loremflickr.com/800/600', responseType: 'arraybuffer' }
+  ];
+  // Pick one at random
+  const { url, responseType } = urls[Math.floor(Math.random() * urls.length)];
+  const response = await axiosInstance.get(url, { responseType });
   return response.data;
 }
-
 async function prepareImageData(imageBuffer) {
   if (!imageBuffer || imageBuffer.length === 0) {
     throw new Error('Invalid image buffer.');
