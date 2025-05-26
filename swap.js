@@ -47,7 +47,7 @@ function getRandomInt(min, max) {
 async function mintTokens(wallet) {
   for (const symbol of TOKEN_LIST) {
     let attempt = 1;
-    const maxRetries = 2;
+    const maxRetries = 1;
     while (attempt <= maxRetries) {
       try {
         console.log(chalk.blue(`🔨 Minting ${symbol} (Attempt ${attempt})...`));
