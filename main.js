@@ -41,35 +41,22 @@ async function main() {
       console.log(chalk.blue(`\n📤 Uploading ${uploadsCount} files with wallet ${wallet.address}`));
 
       for (let i = 1; i <= uploadsCount; i++) {
-        let attempt = 1;
-        const maxRetries = 3;
-        while (attempt <= maxRetries) {
-          try {
-            console.log(chalk.blue(`\n📤 Starting upload #${i} (Attempt ${attempt}) for wallet ${wallet.address}`));
-            const imageBuffer = await fetchRandomImage();
-            const imageData = await prepareImageData(imageBuffer);
+        let receipt = null;
+        try {
+          console.log(chalk.blue(`\n📤 Starting upload #${i} for wallet ${wallet.address}`));
+          const imageBuffer = await fetchRandomImage();
+          const imageData = await prepareImageData(imageBuffer);
 
-            // Upload the file
-            const receipt = await uploadToStorage(imageData, wallet, index, i);
-            console.log(chalk.green(`✅ File #${i} uploaded successfully. TX: ${SCAN_URL}${receipt.hash}`));
-            break;
-          } catch (error) {
-            if (
-              (error.response && error.response.status === 502) ||
-              (error.code === 'SERVER_ERROR' && error.shortMessage && error.shortMessage.includes('502 Bad Gateway')) ||
-              (error.message && error.message.includes('502 Bad Gateway'))
-            ) {
-              console.log(chalk.yellow(`⚠️ 502 Bad Gateway on upload #${i} (Attempt ${attempt}). Retrying...`));
-            } else {
-              console.log(chalk.red(`❌ Failed to upload file #${i}: ${error.message}`));
-              if (attempt >= maxRetries) break;
-            }
-            if (attempt >= maxRetries) break;
-            const delay = 2000 + Math.floor(Math.random() * 2000);
-            console.log(chalk.yellow(`⏳ Waiting ${(delay / 1000).toFixed(2)}s before retry...`));
-            await sleep(delay);
-            attempt++;
-          }
+          // Upload the file (retries handled inside uploadToStorage)
+          receipt = await uploadToStorage(imageData, wallet, index, i);
+        } catch (error) {
+          console.log(chalk.red(`❌ Failed to upload file #${i}: ${error.message}`));
+        }
+
+        if (receipt && receipt.hash) {
+          console.log(chalk.green(`✅ File #${i} uploaded successfully. TX: ${SCAN_URL}${receipt.hash}`));
+        } else {
+          console.log(chalk.red(`❌ File #${i} failed to upload after max retries.`));
         }
       }
 
@@ -95,4 +82,6 @@ function sleep(ms) {
 // Start the main workflow
 main().catch(error => {
   console.error(chalk.red(`❌ Fatal error: ${error.message}`));
+  // Wait and restart after fatal error for true never-stop operation
+  setTimeout(main, 60 * 1000); // Try to restart in 1 minute
 });
