@@ -47,7 +47,7 @@ function getRandomInt(min, max) {
 async function mintTokens(wallet) {
   for (const symbol of TOKEN_LIST) {
     let attempt = 1;
-    const maxRetries = 1;
+    const maxRetries = 5;
     while (attempt <= maxRetries) {
       try {
         console.log(chalk.blue(`🔨 Minting ${symbol} (Attempt ${attempt})...`));
@@ -60,7 +60,6 @@ async function mintTokens(wallet) {
         console.log(chalk.green(`✅ Mint ${symbol} successful! TX: ${SCAN_URL}${receipt.hash}`));
         break;
       } catch (err) {
-        // Retry on 502 or server errors
         if (
           (err.response && err.response.status === 502) ||
           (err.code === 'SERVER_ERROR' && err.shortMessage && err.shortMessage.includes('502 Bad Gateway')) ||
@@ -88,7 +87,7 @@ async function swapTokens(wallet) {
   console.log(chalk.blue(`\n🔁 Performing ${swapTimes} swaps for wallet ${wallet.address}`));
 
   for (let i = 0; i < swapTimes; i++) {
-    const fromSymbol = TOKEN_LIST[getRandomInt(0, TOKEN_LIST.length - 1)];
+    let fromSymbol = TOKEN_LIST[getRandomInt(0, TOKEN_LIST.length - 1)];
     let toSymbol = TOKEN_LIST[getRandomInt(0, TOKEN_LIST.length - 1)];
     while (toSymbol === fromSymbol) {
       toSymbol = TOKEN_LIST[getRandomInt(0, TOKEN_LIST.length - 1)];
@@ -148,23 +147,22 @@ async function swapTokens(wallet) {
       }
     }
 
-    const params = {
-      tokenIn: TOKENS[fromSymbol],
-      tokenOut: TOKENS[toSymbol],
-      fee: 3000,
-      recipient: wallet.address,
-      deadline: Math.floor(Date.now() / 1000) + 600,
-      amountIn: amountIn,
-      amountOutMinimum: 0,
-      sqrtPriceLimitX96: 0
-    };
-
+    // --- SWAP RETRY LOGIC ---
     let attempt = 1;
     const maxRetries = 5;
     while (attempt <= maxRetries) {
       try {
         console.log(chalk.blue(`\n🔄 Swapping ${fromSymbol} to ${toSymbol} (10% balance, Attempt ${attempt})...`));
-        const swapTx = await router.exactInputSingle(params);
+        const swapTx = await router.exactInputSingle({
+          tokenIn: TOKENS[fromSymbol],
+          tokenOut: TOKENS[toSymbol],
+          fee: 3000,
+          recipient: wallet.address,
+          deadline: Math.floor(Date.now() / 1000) + 600,
+          amountIn: amountIn,
+          amountOutMinimum: 0,
+          sqrtPriceLimitX96: 0
+        });
         const receipt = await swapTx.wait();
         console.log(chalk.green(`✅ Swap successful! TX: ${SCAN_URL}${receipt.hash}`));
         break;
@@ -186,7 +184,6 @@ async function swapTokens(wallet) {
         attempt++;
       }
     }
-
     await sleep(5000); // Delay 5 seconds between swaps
   }
 }
