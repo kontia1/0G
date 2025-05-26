@@ -8,7 +8,7 @@ const { mintTokens, swapTokens } = require('./swap');
 const RPC_URL = 'https://evmrpc-testnet.0g.ai';
 const SCAN_URL = 'https://chainscan-galileo.0g.ai/tx/';
 const provider = new ethers.JsonRpcProvider(RPC_URL);
-const CONTRACT_ADDRESS = '0x56A565685C9992BF5ACafb940ff68922980DBBC5';
+const CONTRACT_ADDRESS = '0x5f1D96895e442FC0168FA2F9fb1EBeF93Cb5035e';
 const METHOD_ID = '0xef3e12dc';
 
 // === Main Workflow ===
