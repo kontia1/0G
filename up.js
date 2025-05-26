@@ -8,7 +8,7 @@ const { HttpsProxyAgent } = require('https-proxy-agent');
 // === Configurable Constants ===
 const CHAIN_ID = 80087;
 const RPC_URL = 'https://evmrpc-testnet.0g.ai';
-const CONTRACT_ADDRESS = '0x56A565685C9992BF5ACafb940ff68922980DBBC5';
+const CONTRACT_ADDRESS = '0x5f1d96895e442fc0168fa2f9fb1ebef93cb5035e';
 const METHOD_ID = '0xef3e12dc';
 const PROXY_FILE = 'proxies.txt';
 const TIMEOUT_SECONDS = 120;
