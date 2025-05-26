@@ -8,11 +8,11 @@ const { HttpsProxyAgent } = require('https-proxy-agent');
 // === Configurable Constants ===
 const CHAIN_ID = 80087;
 const RPC_URL = 'https://evmrpc-testnet.0g.ai';
-const CONTRACT_ADDRESS = '0x5f1d96895e442fc0168fa2f9fb1ebef93cb5035e';
+const CONTRACT_ADDRESS = '0x56A565685C9992BF5ACafb940ff68922980DBBC5';
 const METHOD_ID = '0xef3e12dc';
 const PROXY_FILE = 'proxies.txt';
-const TIMEOUT_SECONDS = 120;          // Timeout for transaction confirmation
-const MAX_RETRIES = 3;                // Upload retry attempts
+const TIMEOUT_SECONDS = 120;
+const MAX_RETRIES = 3;
 
 const provider = new ethers.JsonRpcProvider(RPC_URL);
 
@@ -116,19 +116,18 @@ function initializeWallet() {
   return new ethers.Wallet(privateKey, provider);
 }
 
-// === Image Handling ===
+// === Image Handling (random source) ===
 async function fetchRandomImage() {
   const axiosInstance = createAxiosInstance();
-  // List of image APIs
   const urls = [
     { url: 'https://picsum.photos/800/600', responseType: 'arraybuffer' },
     { url: 'https://loremflickr.com/800/600', responseType: 'arraybuffer' }
   ];
-  // Pick one at random
   const { url, responseType } = urls[Math.floor(Math.random() * urls.length)];
   const response = await axiosInstance.get(url, { responseType });
   return response.data;
 }
+
 async function prepareImageData(imageBuffer) {
   if (!imageBuffer || imageBuffer.length === 0) {
     throw new Error('Invalid image buffer.');
@@ -175,7 +174,7 @@ function encodeTransactionData(fileRoot, params) {
   ]);
 }
 
-// === Upload to Storage with Timeout and Retries ===
+// === Upload to Storage with Timeout and Robust 502 Handling ===
 async function uploadToStorage(imageData, wallet, walletIndex, uploadIndex) {
   let attempt = 1;
   while (attempt <= MAX_RETRIES) {
@@ -237,7 +236,21 @@ async function uploadToStorage(imageData, wallet, walletIndex, uploadIndex) {
         throw new Error(`Transaction failed: ${txLink}`);
       }
     } catch (error) {
-      logger.error(`Upload attempt ${attempt} failed: ${error.message}`);
+      // Axios 502 error handling
+      if (error.response && error.response.status === 502) {
+        logger.warn(`502 Bad Gateway on upload attempt ${attempt} (Axios).`);
+      }
+      // ethers.js 502 error handling
+      else if (
+        (error.code === 'SERVER_ERROR' && error.shortMessage && error.shortMessage.includes('502 Bad Gateway')) ||
+        (error.message && error.message.includes('502 Bad Gateway'))
+      ) {
+        logger.warn(`502 Bad Gateway on upload attempt ${attempt} (Ethers.js).`);
+      }
+      // Other errors
+      else {
+        logger.error(`Upload attempt ${attempt} failed: ${error.message}`);
+      }
       if (attempt < MAX_RETRIES) {
         const delay = 10 + Math.random() * 20;
         logger.warn(`Retrying after ${delay.toFixed(2)}s...`);
