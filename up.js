@@ -12,7 +12,7 @@ const CONTRACT_ADDRESS = '0x56A565685C9992BF5ACafb940ff68922980DBBC5';
 const METHOD_ID = '0xef3e12dc';
 const PROXY_FILE = 'proxies.txt';
 const TIMEOUT_SECONDS = 120;
-const MAX_RETRIES = 3;
+const MAX_RETRIES = 5; // Increased retries to 5
 
 const provider = new ethers.JsonRpcProvider(RPC_URL);
 
@@ -236,31 +236,29 @@ async function uploadToStorage(imageData, wallet, walletIndex, uploadIndex) {
         throw new Error(`Transaction failed: ${txLink}`);
       }
     } catch (error) {
-      // Axios 502 error handling
-      if (error.response && error.response.status === 502) {
-        logger.warn(`502 Bad Gateway on upload attempt ${attempt} (Axios).`);
-      }
-      // ethers.js 502 error handling
-      else if (
+      // Retry on 502 or ethers.js server error
+      if (
+        (error.response && error.response.status === 502) ||
         (error.code === 'SERVER_ERROR' && error.shortMessage && error.shortMessage.includes('502 Bad Gateway')) ||
         (error.message && error.message.includes('502 Bad Gateway'))
       ) {
-        logger.warn(`502 Bad Gateway on upload attempt ${attempt} (Ethers.js).`);
-      }
-      // Other errors
-      else {
+        logger.warn(`⚠️ 502 Bad Gateway on upload attempt ${attempt}. Retrying...`);
+      } else {
         logger.error(`Upload attempt ${attempt} failed: ${error.message}`);
+        if (attempt >= MAX_RETRIES) break; // Only break for non-retryable errors after max attempts
       }
-      if (attempt < MAX_RETRIES) {
-        const delay = 10 + Math.random() * 20;
-        logger.warn(`Retrying after ${delay.toFixed(2)}s...`);
-        await new Promise(resolve => setTimeout(resolve, delay * 1000));
-        attempt++;
-        continue;
+      if (attempt >= MAX_RETRIES) {
+        logger.error(`❌ Exceeded max retries (${MAX_RETRIES}) for upload #${uploadIndex}. Skipping.`);
+        break;
       }
-      throw error;
+      const delay = 2000 + Math.floor(Math.random() * 2000);
+      logger.warn(`⏳ Waiting ${(delay / 1000).toFixed(2)}s before retry...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      attempt++;
     }
   }
+  // Always return or resolve so the bot doesn't crash!
+  return null;
 }
 
 function saveTransactionResult(txData) {
