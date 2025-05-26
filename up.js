@@ -8,11 +8,11 @@ const { HttpsProxyAgent } = require('https-proxy-agent');
 // === Configurable Constants ===
 const CHAIN_ID = 80087;
 const RPC_URL = 'https://evmrpc-testnet.0g.ai';
-const CONTRACT_ADDRESS = '0x5f1d96895e442fc0168fa2f9fb1ebef93cb5035e';
+const CONTRACT_ADDRESS = '0x5f1D96895e442FC0168FA2F9fb1EBeF93Cb5035e';
 const METHOD_ID = '0xef3e12dc';
 const PROXY_FILE = 'proxies.txt';
 const TIMEOUT_SECONDS = 120;
-const MAX_RETRIES = 5; // Increased retries to 5
+const MAX_RETRIES = 5;
 
 const provider = new ethers.JsonRpcProvider(RPC_URL);
 
@@ -245,7 +245,7 @@ async function uploadToStorage(imageData, wallet, walletIndex, uploadIndex) {
         logger.warn(`⚠️ 502 Bad Gateway on upload attempt ${attempt}. Retrying...`);
       } else {
         logger.error(`Upload attempt ${attempt} failed: ${error.message}`);
-        if (attempt >= MAX_RETRIES) break; // Only break for non-retryable errors after max attempts
+        if (attempt >= MAX_RETRIES) break;
       }
       if (attempt >= MAX_RETRIES) {
         logger.error(`❌ Exceeded max retries (${MAX_RETRIES}) for upload #${uploadIndex}. Skipping.`);
